@@ -8,7 +8,6 @@ import time
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.title("📸 Frame-by-Frame Oocyte Tracker")
 
-# Leer datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
 for col in df.columns:
     if df[col].dtype == 'object':
@@ -16,15 +15,13 @@ for col in df.columns:
         df[col] = df[col].str.replace(',', '.', regex=False)
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
-# Inicializar estado
 if "second" not in st.session_state:
     st.session_state.second = 0
 if "playing" not in st.session_state:
     st.session_state.playing = False
 if "speed" not in st.session_state:
-    st.session_state.speed = 1  # 1x o 5x
+    st.session_state.speed = 1
 
-# Placeholder para reproducir imagen y datos
 image_placeholder = st.empty()
 slider_placeholder = st.empty()
 data_placeholder = st.empty()
@@ -54,45 +51,50 @@ def mostrar_contenido():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar contenido inicial
+st.image("slider_background_custom.jpg", use_container_width=True)
 mostrar_contenido()
 
-# Slider sincronizado
-selected = slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
+selected = slider_placeholder.slider("🕒 Segundo del vídeo", 0, 359, value=st.session_state.second)
 if selected != st.session_state.second:
     st.session_state.second = selected
     st.session_state.playing = False
     mostrar_contenido()
 
-# Controles
-col_play, col_pause, col_stop, col_fast = st.columns(4)
-with col_play:
+col1, col2, col3, col4, col5, col6 = st.columns(6)
+with col1:
+    if st.button("⏪ Back"):
+        st.session_state.second = max(0, st.session_state.second - 1)
+        st.session_state.playing = False
+        mostrar_contenido()
+with col2:
     if st.button("▶️ Play 1x"):
         st.session_state.playing = True
         st.session_state.speed = 1
-with col_pause:
+with col3:
+    if st.button("⏩ Forward"):
+        st.session_state.second = min(359, st.session_state.second + 1)
+        st.session_state.playing = False
+        mostrar_contenido()
+with col4:
     if st.button("⏸️ Pause"):
         st.session_state.playing = False
-with col_stop:
+with col5:
     if st.button("⏹️ Stop"):
         st.session_state.playing = False
         st.session_state.second = 0
         mostrar_contenido()
-with col_fast:
+with col6:
     if st.button("⏩ Play 5x"):
         st.session_state.playing = True
         st.session_state.speed = 5
 
-# Reproducción automática con velocidad 1x o 5x
 if st.session_state.playing:
     for _ in range(100):
-        if not st.session_state.playing:
-            break
-        time.sleep(0.5)
-        st.session_state.second = min(st.session_state.second + st.session_state.speed, len(df) - 1)
-        mostrar_contenido()
-        slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
-        if st.session_state.second == len(df) - 1:
+        if not st.session_state.playing or st.session_state.second >= 359:
             st.session_state.playing = False
             break
+        time.sleep(0.5)
+        st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
+        mostrar_contenido()
+        slider_placeholder.slider("🕒 Segundo del vídeo", 0, 359, value=st.session_state.second)
 
