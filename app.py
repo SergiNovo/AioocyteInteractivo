@@ -78,4 +78,5 @@ if st.session_state.playing:
         time.sleep(0.5)
         st.session_state.second = min(st.session_state.second + 1, len(df) - 1)
         mostrar_contenido()
-        if st
+        if st.session_state.second == len(df) - 1 or not st.session_state.playing:
+            break
