@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from PIL import Image
@@ -8,6 +7,7 @@ import time
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.title("📸 Frame-by-Frame Oocyte Tracker")
 
+# Cargar datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
 for col in df.columns:
     if df[col].dtype == 'object':
@@ -15,6 +15,7 @@ for col in df.columns:
         df[col] = df[col].str.replace(',', '.', regex=False)
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
+# Estado inicial
 if "second" not in st.session_state:
     st.session_state.second = 0
 if "playing" not in st.session_state:
@@ -22,10 +23,12 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
+# Contenedores visuales
 image_placeholder = st.empty()
 slider_placeholder = st.empty()
 data_placeholder = st.empty()
 
+# Mostrar contenido: imagen y datos
 def mostrar_contenido():
     with image_placeholder.container():
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
@@ -51,50 +54,11 @@ def mostrar_contenido():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-st.image("slider_background_custom.jpg", use_container_width=True)
+# Mostrar fondo del slider (gráfico)
+st.image("slider_background_final.png", use_container_width=True)
+
+# Mostrar contenido actual
 mostrar_contenido()
 
-selected = slider_placeholder.slider("🕒 Segundo del vídeo", 0, 359, value=st.session_state.second)
-if selected != st.session_state.second:
-    st.session_state.second = selected
-    st.session_state.playing = False
-    mostrar_contenido()
-
-col1, col2, col3, col4, col5, col6 = st.columns(6)
-with col1:
-    if st.button("⏪ Back"):
-        st.session_state.second = max(0, st.session_state.second - 1)
-        st.session_state.playing = False
-        mostrar_contenido()
-with col2:
-    if st.button("▶️ Play 1x"):
-        st.session_state.playing = True
-        st.session_state.speed = 1
-with col3:
-    if st.button("⏩ Forward"):
-        st.session_state.second = min(359, st.session_state.second + 1)
-        st.session_state.playing = False
-        mostrar_contenido()
-with col4:
-    if st.button("⏸️ Pause"):
-        st.session_state.playing = False
-with col5:
-    if st.button("⏹️ Stop"):
-        st.session_state.playing = False
-        st.session_state.second = 0
-        mostrar_contenido()
-with col6:
-    if st.button("⏩ Play 5x"):
-        st.session_state.playing = True
-        st.session_state.speed = 5
-
-if st.session_state.playing:
-    for _ in range(100):
-        if not st.session_state.playing or st.session_state.second >= 359:
-            st.session_state.playing = False
-            break
-        time.sleep(0.5)
-        st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
-        mostrar_contenido()
-        slider_placeholder.slider("🕒 Segundo del vídeo", 0, 359, value=st.session_state.second)
+# Slider si
 
