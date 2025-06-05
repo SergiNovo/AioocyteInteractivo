@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 from PIL import Image
@@ -23,7 +22,7 @@ second = st.slider("🕒 Elige segundo del vídeo", 0, min(len(df)-1, 359), 0)
 frame_path = f"frames/frame_{second}.jpg"
 if os.path.exists(frame_path):
     image = Image.open(frame_path)
-    st.image(image, caption=f"Segundo {second}", use_column_width=True)
+    st.image(image, caption=f"Segundo {second}", use_container_width=True)
 else:
     st.warning(f"No se encontró la imagen para el segundo {second}")
 
@@ -44,3 +43,4 @@ col1.metric("Area %", f"{dato['Area%']:.3f}")
 col2.metric("Circularity", f"{dato['Circularity']:.3f}")
 col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
 col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
+
