@@ -4,10 +4,11 @@ from PIL import Image
 import os
 import time
 
+# Configuración de página
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.title("📸 Frame-by-Frame Oocyte Tracker")
 
-# Leer datos
+# Cargar datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
 for col in df.columns:
     if df[col].dtype == 'object':
@@ -36,10 +37,10 @@ def render_frame():
         else:
             st.warning(f"No se encontró imagen para el segundo {st.session_state.second}")
 
-        # Slider con key dinámico
+        # Slider (clave fija)
         selected = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359),
                              value=st.session_state.second,
-                             key=f"slider_{st.session_state.second}")
+                             key="slider")
         if selected != st.session_state.second:
             st.session_state.second = selected
             st.session_state.playing = False
@@ -62,7 +63,7 @@ def render_frame():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Controles con claves fijas
+        # Botones de control (keys fijas)
         col_play, col_pause, col_back, col_forward = st.columns(4)
         with col_play:
             if st.button("▶️ Play", key="play"):
