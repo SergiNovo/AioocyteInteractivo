@@ -1,14 +1,14 @@
+
 import streamlit as st
 import pandas as pd
 from PIL import Image
 import os
 import time
 
-# Configuración de página
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.title("📸 Frame-by-Frame Oocyte Tracker")
 
-# Cargar datos
+# Leer datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
 for col in df.columns:
     if df[col].dtype == 'object':
@@ -22,30 +22,22 @@ if "second" not in st.session_state:
 if "playing" not in st.session_state:
     st.session_state.playing = False
 if "speed" not in st.session_state:
-    st.session_state.speed = 0.5  # velocidad normal
+    st.session_state.speed = 1  # 1x o 5x
 
-# Contenedor principal
-main_placeholder = st.empty()
+# Placeholder para reproducir imagen y datos
+image_placeholder = st.empty()
+slider_placeholder = st.empty()
+data_placeholder = st.empty()
 
-def render_frame():
-    with main_placeholder.container():
-        # Imagen
+def mostrar_contenido():
+    with image_placeholder.container():
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
             st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
         else:
             st.warning(f"No se encontró imagen para el segundo {st.session_state.second}")
-
-        # Slider (clave fija)
-        selected = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359),
-                             value=st.session_state.second,
-                             key="slider")
-        if selected != st.session_state.second:
-            st.session_state.second = selected
-            st.session_state.playing = False
-
-        # Datos
+    with data_placeholder.container():
         dato = df.iloc[st.session_state.second]
         st.markdown(f"""
             <div style='text-align: center; margin-top: 20px;'>
@@ -56,48 +48,51 @@ def render_frame():
             </div>
             <hr style="margin: 20px 0;">
         """, unsafe_allow_html=True)
-
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Area %", f"{dato['Area%']:.3f}")
         col2.metric("Circularity", f"{dato['Circularity']:.3f}")
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Botones de control (keys fijas)
-        col_play, col_pause, col_back, col_forward = st.columns(4)
-        with col_play:
-            if st.button("▶️ Play", key="play"):
-                st.session_state.playing = True
-                st.session_state.speed = 0.5
-        with col_pause:
-            if st.button("⏸️ Pause", key="pause"):
-                st.session_state.playing = False
-        with col_back:
-            if st.button("⏪ Back", key="back"):
-                st.session_state.second = max(0, st.session_state.second - 1)
-        with col_forward:
-            if st.button("⏩ Forward", key="forward"):
-                st.session_state.second = min(len(df)-1, st.session_state.second + 1)
+# Mostrar contenido inicial
+mostrar_contenido()
 
-        col_stop, col_fast = st.columns(2)
-        with col_stop:
-            if st.button("⏹️ Stop", key="stop"):
-                st.session_state.second = 0
-                st.session_state.playing = False
-                st.session_state.speed = 0.5
-        with col_fast:
-            if st.button("⏩ 5x Speed", key="fast"):
-                st.session_state.playing = True
-                st.session_state.speed = 0.1
+# Slider sincronizado
+selected = slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
+if selected != st.session_state.second:
+    st.session_state.second = selected
+    st.session_state.playing = False
+    mostrar_contenido()
 
-# Mostrar la primera vez
-render_frame()
+# Controles
+col_play, col_pause, col_stop, col_fast = st.columns(4)
+with col_play:
+    if st.button("▶️ Play 1x"):
+        st.session_state.playing = True
+        st.session_state.speed = 1
+with col_pause:
+    if st.button("⏸️ Pause"):
+        st.session_state.playing = False
+with col_stop:
+    if st.button("⏹️ Stop"):
+        st.session_state.playing = False
+        st.session_state.second = 0
+        mostrar_contenido()
+with col_fast:
+    if st.button("⏩ Play 5x"):
+        st.session_state.playing = True
+        st.session_state.speed = 5
 
-# Reproducción automática
+# Reproducción automática con velocidad 1x o 5x
 if st.session_state.playing:
-    for _ in range(500):
-        if not st.session_state.playing or st.session_state.second >= len(df) - 1:
+    for _ in range(100):
+        if not st.session_state.playing:
             break
-        time.sleep(st.session_state.speed)
-        st.session_state.second += 1
-        render_frame()
+        time.sleep(0.5)
+        st.session_state.second = min(st.session_state.second + st.session_state.speed, len(df) - 1)
+        mostrar_contenido()
+        slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
+        if st.session_state.second == len(df) - 1:
+            st.session_state.playing = False
+            break
+
