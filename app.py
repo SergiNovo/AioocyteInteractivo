@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from PIL import Image
@@ -20,8 +21,10 @@ if "second" not in st.session_state:
     st.session_state.second = 0
 if "playing" not in st.session_state:
     st.session_state.playing = False
+if "speed" not in st.session_state:
+    st.session_state.speed = 1.0  # Velocidad normal
 
-# Placeholder para reproducir imagen y datos
+# Placeholder para imagen, slider y datos
 image_placeholder = st.empty()
 slider_placeholder = st.empty()
 data_placeholder = st.empty()
@@ -51,10 +54,10 @@ def mostrar_contenido():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar contenido inicial
+# Mostrar contenido actual
 mostrar_contenido()
 
-# Slider sincronizado
+# Slider
 selected = slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
 if selected != st.session_state.second:
     st.session_state.second = selected
@@ -66,6 +69,7 @@ col_play, col_pause, col_back, col_forward = st.columns(4)
 with col_play:
     if st.button("▶️ Play"):
         st.session_state.playing = True
+        st.session_state.speed = 1.0
 with col_pause:
     if st.button("⏸️ Pause"):
         st.session_state.playing = False
@@ -78,12 +82,27 @@ with col_forward:
         st.session_state.second = min(len(df)-1, st.session_state.second + 1)
         mostrar_contenido()
 
-# Reproducción automática (solo si se pulsa Play)
+col_stop, col_fast = st.columns(2)
+with col_stop:
+    if st.button("⏹️ Stop"):
+        st.session_state.second = 0
+        st.session_state.playing = False
+        st.session_state.speed = 1.0
+        mostrar_contenido()
+with col_fast:
+    if st.button("⏩ 5x Speed"):
+        st.session_state.playing = True
+        st.session_state.speed = 0.1  # 5x velocidad (0.5 / 5)
+
+# Reproducción
 if st.session_state.playing:
-    for _ in range(100):
+    for _ in range(500):
         if not st.session_state.playing:
             break
-        time.sleep(0.5)
-        st.session_state.second = min(st.session_state.second + 1, len(df) - 1)
+        time.sleep(st.session_state.speed)
+        if st.session_state.second >= len(df) - 1:
+            break
+        st.session_state.second += 1
         mostrar_contenido()
         slider_placeholder.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
+
