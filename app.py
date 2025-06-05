@@ -23,50 +23,61 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Contenedores
-image_placeholder = st.empty()
-data_placeholder = st.empty()
-
-# Mostrar imagen + datos
+# Mostrar imagen y datos
 def mostrar_contenido():
-    with image_placeholder.container():
-        frame_path = f"frames/frame_{st.session_state.second}.jpg"
-        if os.path.exists(frame_path):
-            image = Image.open(frame_path)
-            st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
-        else:
-            st.warning(f"No se encontró imagen para el segundo {st.session_state.second}")
-
-    with data_placeholder.container():
-        dato = df.iloc[st.session_state.second]
-        st.markdown(f"""
-            <div style='text-align: center; margin-top: 20px;'>
-                <div style='font-size: 48px; font-weight: bold; color: #005EA8;'>
-                    {dato['Survival']:.1f}%
-                </div>
-                <div style='font-size: 16px; color: #444;'>Probability of Survival</div>
+    frame_path = f"frames/frame_{st.session_state.second}.jpg"
+    if os.path.exists(frame_path):
+        st.image(frame_path, caption=f"Segundo {st.session_state.second}", use_container_width=True)
+    else:
+        st.warning(f"No se encontró imagen para el segundo {st.session_state.second}")
+    
+    dato = df.iloc[st.session_state.second]
+    st.markdown(f"""
+        <div style='text-align: center; margin-top: 20px;'>
+            <div style='font-size: 48px; font-weight: bold; color: #005EA8;'>
+                {dato['Survival']:.1f}%
             </div>
-            <hr style="margin: 20px 0;">
-        """, unsafe_allow_html=True)
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Area %", f"{dato['Area%']:.3f}")
-        col2.metric("Circularity", f"{dato['Circularity']:.3f}")
-        col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
-        col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
+            <div style='font-size: 16px; color: #444;'>Probability of Survival</div>
+        </div>
+        <hr style="margin: 20px 0;">
+    """, unsafe_allow_html=True)
 
-# Slider con gráfico de fondo
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Area %", f"{dato['Area%']:.3f}")
+    col2.metric("Circularity", f"{dato['Circularity']:.3f}")
+    col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
+    col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
+
+# Imagen del gráfico como fondo visual
+st.image("slider_background_final.png", use_container_width=True)
+
+# Forzar slider a ocupar el mismo ancho (1280px)
+st.markdown(
+    """
+    <style>
+    .custom-slider .stSlider > div {
+        width: 1280px !important;
+        margin: auto;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
+
+# Slider visual sobre la gráfica
 with st.container():
-    st.image("slider_background_final.png", use_container_width=True)
-    selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
-    if selected != st.session_state.second:
-        st.session_state.second = selected
-        st.session_state.playing = False
-        mostrar_contenido()
+    with st.container():
+        st.markdown('<div class="custom-slider">', unsafe_allow_html=True)
+        selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed", key="main_slider")
+        st.markdown('</div>', unsafe_allow_html=True)
+        if selected != st.session_state.second:
+            st.session_state.second = selected
+            st.session_state.playing = False
+            mostrar_contenido()
 
-# Mostrar contenido actual al cargar
+# Mostrar frame actual
 mostrar_contenido()
 
-# Controles de reproducción
+# Controles
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 with col1:
     if st.button("⏪ Back"):
@@ -95,7 +106,7 @@ with col6:
         st.session_state.playing = True
         st.session_state.speed = 5
 
-# Reproducción automática
+# Reproducción automática con slider animado
 if st.session_state.playing:
     for _ in range(100):
         if not st.session_state.playing or st.session_state.second >= 359:
@@ -103,4 +114,10 @@ if st.session_state.playing:
             break
         time.sleep(0.5)
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
+        
+        # Redibuja slider
+        st.markdown('<div class="custom-slider">', unsafe_allow_html=True)
+        st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed", key=f"slider_{st.session_state.second}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
         mostrar_contenido()
