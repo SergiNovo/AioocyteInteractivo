@@ -36,8 +36,10 @@ def render_frame():
         else:
             st.warning(f"No se encontró imagen para el segundo {st.session_state.second}")
 
-        # Slider
-        selected = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second, key="slider")
+        # Slider con key dinámico
+        selected = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359),
+                             value=st.session_state.second,
+                             key=f"slider_{st.session_state.second}")
         if selected != st.session_state.second:
             st.session_state.second = selected
             st.session_state.playing = False
@@ -87,10 +89,10 @@ def render_frame():
                 st.session_state.playing = True
                 st.session_state.speed = 0.1
 
-# Mostrar contenido
+# Mostrar la primera vez
 render_frame()
 
-# Reproducción automática
+# Bucle de reproducción automática
 if st.session_state.playing:
     for _ in range(500):
         if not st.session_state.playing or st.session_state.second >= len(df) - 1:
