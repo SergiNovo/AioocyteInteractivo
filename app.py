@@ -25,7 +25,6 @@ if "speed" not in st.session_state:
 
 # Contenedores
 image_placeholder = st.empty()
-slider_placeholder = st.empty()
 data_placeholder = st.empty()
 
 # Mostrar imagen + datos
@@ -55,21 +54,19 @@ def mostrar_contenido():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar fondo gráfico
-st.image("slider_background_final.png", use_container_width=True)
-
-# Mostrar contenido actual
-mostrar_contenido()
-
-# Slider siempre visible
-with slider_placeholder:
-    selected = st.slider("🕒 Segundo del vídeo", 0, 359, value=st.session_state.second)
+# Slider con gráfico de fondo
+with st.container():
+    st.image("slider_background_final.png", use_container_width=True)
+    selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
     if selected != st.session_state.second:
         st.session_state.second = selected
         st.session_state.playing = False
         mostrar_contenido()
 
-# Controles
+# Mostrar contenido actual al cargar
+mostrar_contenido()
+
+# Controles de reproducción
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 with col1:
     if st.button("⏪ Back"):
