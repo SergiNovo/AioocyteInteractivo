@@ -62,30 +62,30 @@ def render_frame():
         col3.metric("V. Deshidratación", f"{dato['Vdeshidratacion']:.2f}%")
         col4.metric("V. Deplasmolisis", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Controles con keys únicos
+        # Controles con claves fijas
         col_play, col_pause, col_back, col_forward = st.columns(4)
         with col_play:
-            if st.button("▶️ Play", key=f"play_{st.session_state.second}"):
+            if st.button("▶️ Play", key="play"):
                 st.session_state.playing = True
                 st.session_state.speed = 0.5
         with col_pause:
-            if st.button("⏸️ Pause", key=f"pause_{st.session_state.second}"):
+            if st.button("⏸️ Pause", key="pause"):
                 st.session_state.playing = False
         with col_back:
-            if st.button("⏪ Back", key=f"back_{st.session_state.second}"):
+            if st.button("⏪ Back", key="back"):
                 st.session_state.second = max(0, st.session_state.second - 1)
         with col_forward:
-            if st.button("⏩ Forward", key=f"forward_{st.session_state.second}"):
+            if st.button("⏩ Forward", key="forward"):
                 st.session_state.second = min(len(df)-1, st.session_state.second + 1)
 
         col_stop, col_fast = st.columns(2)
         with col_stop:
-            if st.button("⏹️ Stop", key=f"stop_{st.session_state.second}"):
+            if st.button("⏹️ Stop", key="stop"):
                 st.session_state.second = 0
                 st.session_state.playing = False
                 st.session_state.speed = 0.5
         with col_fast:
-            if st.button("⏩ 5x Speed", key=f"fast_{st.session_state.second}"):
+            if st.button("⏩ 5x Speed", key="fast"):
                 st.session_state.playing = True
                 st.session_state.speed = 0.1
 
