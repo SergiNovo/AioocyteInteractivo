@@ -54,8 +54,11 @@ def mostrar_contenido():
 
 mostrar_contenido()
 
-# Slider debajo del video
-st.session_state.second = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), st.session_state.second)
+# Slider sincronizado con estado
+selected = st.slider("🕒 Segundo del vídeo", 0, min(len(df)-1, 359), value=st.session_state.second)
+if selected != st.session_state.second:
+    st.session_state.second = selected
+    st.session_state.playing = False  # Si se mueve manualmente, pausa
 
 # Botones
 col_play, col_pause, col_back, col_forward = st.columns([1,1,1,1])
@@ -72,11 +75,11 @@ with col_forward:
     if st.button("⏩ Forward"):
         st.session_state.second = min(len(df)-1, st.session_state.second + 1)
 
-# Ejecutar reproducción sin usar rerun
+# Ejecutar reproducción sin rerun
 if st.session_state.playing:
     for _ in range(60):  # máximo 60 pasos
         time.sleep(0.5)
         st.session_state.second = min(st.session_state.second + 1, len(df) - 1)
         mostrar_contenido()
-        if st.session_state.second == len(df) - 1 or not st.session_state.playing:
-            break
+        st.experimental_rerun()
+
