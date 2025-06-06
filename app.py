@@ -25,12 +25,19 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Layout principal
+# Layout fijo para evitar duplicación
 col_video, col_datos = st.columns([2, 3])
+video_placeholder = col_video.empty()
+supervivencia_placeholder = col_datos.empty()
+metrics_placeholder = col_datos.empty()
+grafico_placeholder = col_datos.empty()
+slider_placeholder = col_datos.empty()
+controles_placeholder = col_datos.empty()
 
-# Mostrar contenido principal
+# Mostrar contenido sin redibujar estructuras
 def mostrar_contenido():
-    with col_video:
+    # Imagen del frame
+    with video_placeholder:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
@@ -38,10 +45,9 @@ def mostrar_contenido():
         else:
             st.warning("No se encontró imagen.")
 
-    with col_datos:
+    # Supervivencia
+    with supervivencia_placeholder:
         dato = df.iloc[st.session_state.second]
-
-        # Supervivencia centrada y grande
         st.markdown(f"""
             <div style='text-align: center; margin-top: 10px;'>
                 <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
@@ -52,51 +58,56 @@ def mostrar_contenido():
             <hr style="margin: 10px 0;">
         """, unsafe_allow_html=True)
 
-        # Valores distribuidos uniformemente
+    # Métricas
+    with metrics_placeholder:
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Area %", f"{dato['Area%']:.3f}")
         m2.metric("Circularity", f"{dato['Circularity']:.3f}")
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Gráfico de fondo + slider
+    # Gráfico
+    with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
-        render_slider()
 
-        # Controles justo debajo
-        c1, c2, c3, c4, c5, c6 = st.columns(6)
-        with c1:
-            if st.button("⏪ Back"):
-                st.session_state.second = max(0, st.session_state.second - 1)
-                st.session_state.playing = False
-        with c2:
-            if st.button("▶️ Play 1x"):
-                st.session_state.playing = True
-                st.session_state.speed = 1
-        with c3:
-            if st.button("⏩ Forward"):
-                st.session_state.second = min(359, st.session_state.second + 1)
-                st.session_state.playing = False
-        with c4:
-            if st.button("⏸️ Pause"):
-                st.session_state.playing = False
-        with c5:
-            if st.button("⏹️ Stop"):
-                st.session_state.playing = False
-                st.session_state.second = 0
-        with c6:
-            if st.button("⏩ Play 5x"):
-                st.session_state.playing = True
-                st.session_state.speed = 5
+    # Slider
+    with slider_placeholder:
+        selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
+        if selected != st.session_state.second:
+            st.session_state.second = selected
+            st.session_state.playing = False
 
-# Slider sincronizado
-def render_slider():
-    selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
-    if selected != st.session_state.second:
-        st.session_state.second = selected
-        st.session_state.playing = False
+# Controles de reproducción (una vez, no en bucle)
+with controles_placeholder:
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    with c1:
+        if st.button("⏪ Back"):
+            st.session_state.second = max(0, st.session_state.second - 1)
+            st.session_state.playing = False
+            mostrar_contenido()
+    with c2:
+        if st.button("▶️ Play 1x"):
+            st.session_state.playing = True
+            st.session_state.speed = 1
+    with c3:
+        if st.button("⏩ Forward"):
+            st.session_state.second = min(359, st.session_state.second + 1)
+            st.session_state.playing = False
+            mostrar_contenido()
+    with c4:
+        if st.button("⏸️ Pause"):
+            st.session_state.playing = False
+    with c5:
+        if st.button("⏹️ Stop"):
+            st.session_state.playing = False
+            st.session_state.second = 0
+            mostrar_contenido()
+    with c6:
+        if st.button("⏩ Play 5x"):
+            st.session_state.playing = True
+            st.session_state.speed = 5
 
-# Mostrar primer frame
+# Mostrar contenido por primera vez
 mostrar_contenido()
 
 # Reproducción automática
@@ -108,4 +119,3 @@ if st.session_state.playing:
         time.sleep(0.5)
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
-
