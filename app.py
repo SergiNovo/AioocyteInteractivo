@@ -39,7 +39,7 @@ def mostrar_contenido():
     with video_placeholder:
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
+            st.image(image, caption=f"second {st.session_state.second}", use_container_width=True)
         else:
             st.warning("No se encontró imagen.")
 
@@ -121,3 +121,12 @@ if st.session_state.playing:
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
         render_slider()
+# Logo con enlace
+st.markdown("""
+<div style='text-align: center; margin-top: 30px;'>
+    <a href='https://www.fertilab.com' target='_blank'>
+        <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
+             alt='Fertilab Barcelona' width='200'/>
+    </a>
+</div>
+""", unsafe_allow_html=True)
