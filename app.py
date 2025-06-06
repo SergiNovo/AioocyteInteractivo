@@ -125,7 +125,7 @@ if st.session_state.playing:
 # Logo dentro de la columna de datos, justo debajo de los botones
 with col_datos:
     st.markdown("""
-    <div style='text-align: center; margin-top: 20px;'>
+    <div style='text-align: center; margin-top: 10px;'>
         <a href='https://www.fertilab.com' target='_blank'>
             <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
                  alt='Fertilab Barcelona' width='200'/>
