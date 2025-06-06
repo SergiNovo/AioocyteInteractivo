@@ -5,7 +5,7 @@ import os
 import time
 
 # Configurar página
-st.set_page_config(page_title="Oocyte Tracker", layout="wide")
+st.set_page_config(page_title="Vitrification Viability via Osmotic Response", layout="wide")
 st.markdown("<h1 style='text-align: center;'>Vitrification Viability via Osmotic Response</h1>", unsafe_allow_html=True)
 
 # Cargar datos
