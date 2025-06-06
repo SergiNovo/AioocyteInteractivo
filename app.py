@@ -35,9 +35,15 @@ if not st.session_state.logged_in:
         else:
             df_users = pd.DataFrame([user_data])
 
-        df_users.to_csv("users.csv", index=False)
+        try:
+            df_users.to_csv("users.csv", index=False)
+            st.success("Registration successful! File 'users.csv' updated.")
+        except Exception as e:
+            st.error(f"Error saving users.csv: {e}")
+
         st.session_state.logged_in = True
         st.rerun()
+
 
 # --- APP CONTENT START ---
 if st.session_state.logged_in:
