@@ -46,7 +46,7 @@ def mostrar_contenido():
     dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
         st.markdown(f"""
-            <div style='text-align: center; margin-top: 10px;'>
+            <div style='text-align: center; margin-top: 0px;'>
                 <div style='font-size: 96px; font-weight: bold; color: #005EA8;'>
                     {dato['Survival']:.1f}%
                 </div>
