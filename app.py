@@ -52,7 +52,7 @@ def mostrar_contenido():
                 </div>
                 <div style='font-size: 20px; color: #444;'>Probability of oocyte survival after vitrification</div>
             </div>
-            <hr style="margin: 15px 0;">
+            <hr style="margin: 1px 0;">
         """, unsafe_allow_html=True)
 
     with metrics_placeholder:
