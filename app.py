@@ -25,18 +25,10 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Layout apaisado
+# Layout apaisado: video izquierda, resto derecha
 col_video, col_datos = st.columns([2, 3])
 
-def render_slider():
-    st.slider("🕒", 0, 359, value=st.session_state.second,
-              key="slider_key", label_visibility="collapsed",
-              on_change=slider_changed)
-
-def slider_changed():
-    st.session_state.playing = False
-
-# Mostrar contenido sincronizado
+# Función para mostrar contenido
 def mostrar_contenido():
     with col_video:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
@@ -49,35 +41,28 @@ def mostrar_contenido():
     with col_datos:
         dato = df.iloc[st.session_state.second]
 
-        # Contenedor vertical para igualar altura
-        st.markdown("""
-        <div style='display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-height: 620px;'>
-        """, unsafe_allow_html=True)
-
-        # Supervivencia gigante
+        # Probabilidad de supervivencia muy grande (alineada al alto del vídeo)
         st.markdown(f"""
-            <div style='text-align: center;'>
-                <div style='font-size: 10vh; font-weight: bold; color: #005EA8; line-height: 1;'>
+            <div style='text-align: center; margin-top: 5px; margin-bottom: 30px; height: 60vh; display: flex; flex-direction: column; justify-content: center;'>
+                <div style='font-size: 16vh; font-weight: bold; color: #005EA8; line-height: 1;'>
                     {dato['Survival']:.1f}%
                 </div>
-                <div style='font-size: 2.2vh; color: #444;'>Probability of oocyte survival after vitrification</div>
+                <div style='font-size: 2.2vh; color: #444; margin-top: 1vh;'>Probability of oocyte survival after vitrification</div>
             </div>
         """, unsafe_allow_html=True)
 
-        # Métricas alineadas
+        # Métricas distribuidas uniformemente
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Area %", f"{dato['Area%']:.3f}")
         m2.metric("Circularity", f"{dato['Circularity']:.3f}")
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Gráfico del slider
+        # Fondo de gráfica y slider
         st.image("slider_background_final.png", use_container_width=True)
-
-        # Slider
         render_slider()
 
-        # Controles
+        # Controles justo debajo del slider
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1:
             if st.button("⏪ Back"):
@@ -103,7 +88,14 @@ def mostrar_contenido():
                 st.session_state.playing = True
                 st.session_state.speed = 5
 
-        st.markdown("</div>", unsafe_allow_html=True)
+# Slider sincronizado
+def render_slider():
+    st.slider("🕒", 0, 359, value=st.session_state.second,
+              key="slider_key", label_visibility="collapsed",
+              on_change=slider_changed)
+
+def slider_changed():
+    st.session_state.playing = False
 
 # Mostrar contenido inicial
 mostrar_contenido()
