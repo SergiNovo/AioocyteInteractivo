@@ -25,10 +25,10 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Layout apaisado: video izquierda, resto derecha
+# Layout principal
 col_video, col_datos = st.columns([2, 3])
 
-# Mostrar imagen del frame
+# Mostrar contenido principal
 def mostrar_contenido():
     with col_video:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
@@ -41,7 +41,7 @@ def mostrar_contenido():
     with col_datos:
         dato = df.iloc[st.session_state.second]
 
-        # Probabilidad de supervivencia
+        # Supervivencia centrada y grande
         st.markdown(f"""
             <div style='text-align: center; margin-top: 10px;'>
                 <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
@@ -52,18 +52,18 @@ def mostrar_contenido():
             <hr style="margin: 10px 0;">
         """, unsafe_allow_html=True)
 
-        # Valores distribuidos
+        # Valores distribuidos uniformemente
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Area %", f"{dato['Area%']:.3f}")
         m2.metric("Circularity", f"{dato['Circularity']:.3f}")
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Gráfico + slider
+        # Gráfico de fondo + slider
         st.image("slider_background_final.png", use_container_width=True)
         render_slider()
 
-        # Controles justo debajo del slider
+        # Controles justo debajo
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1:
             if st.button("⏪ Back"):
@@ -89,25 +89,23 @@ def mostrar_contenido():
                 st.session_state.playing = True
                 st.session_state.speed = 5
 
-# Función slider
+# Slider sincronizado
 def render_slider():
-    st.slider("🕒", 0, 359, value=st.session_state.second,
-              key="slider_key", label_visibility="collapsed",
-              on_change=slider_changed)
+    selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
+    if selected != st.session_state.second:
+        st.session_state.second = selected
+        st.session_state.playing = False
 
-# Callback para el slider
-def slider_changed():
-    st.session_state.playing = False
-
-# Mostrar por primera vez
+# Mostrar primer frame
 mostrar_contenido()
 
 # Reproducción automática
 if st.session_state.playing:
-    for _ in range(100):
+    for _ in range(500):
         if not st.session_state.playing or st.session_state.second >= 359:
             st.session_state.playing = False
             break
         time.sleep(0.5)
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
+
