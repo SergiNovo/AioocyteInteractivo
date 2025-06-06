@@ -41,13 +41,13 @@ def mostrar_contenido():
     with col_datos:
         dato = df.iloc[st.session_state.second]
 
-        # Probabilidad de supervivencia muy grande (alineada al alto del vídeo)
+        # Probabilidad de supervivencia muy grande
         st.markdown(f"""
-            <div style='text-align: center; margin-top: 5px; margin-bottom: 30px; height: 60vh; display: flex; flex-direction: column; justify-content: center;'>
-                <div style='font-size: 16vh; font-weight: bold; color: #005EA8; line-height: 1;'>
+            <div style='text-align: center; margin-top: 5px; margin-bottom: 30px; height: 45vh; display: flex; flex-direction: column; justify-content: center;'>
+                <div style='font-size: 12vh; font-weight: bold; color: #005EA8; line-height: 1;'>
                     {dato['Survival']:.1f}%
                 </div>
-                <div style='font-size: 2.2vh; color: #444; margin-top: 1vh;'>Probability of oocyte survival after vitrification</div>
+                <div style='font-size: 2.5vh; color: #444; margin-top: 0.5vh;'>Probability of oocyte survival after vitrification</div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -58,7 +58,7 @@ def mostrar_contenido():
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-        # Fondo de gráfica y slider
+        # Slider con fondo de gráfica
         st.image("slider_background_final.png", use_container_width=True)
         render_slider()
 
@@ -88,12 +88,13 @@ def mostrar_contenido():
                 st.session_state.playing = True
                 st.session_state.speed = 5
 
-# Slider sincronizado
+# Slider que actualiza segundo
 def render_slider():
     st.slider("🕒", 0, 359, value=st.session_state.second,
               key="slider_key", label_visibility="collapsed",
               on_change=slider_changed)
 
+# Callback del slider
 def slider_changed():
     st.session_state.playing = False
 
