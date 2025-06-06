@@ -5,7 +5,7 @@ import os
 import time
 
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
-st.title("📸 Frame-by-Frame Oocyte Tracker")
+st.title("Vitrification Viability via Osmotic Response")
 
 # Cargar datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
