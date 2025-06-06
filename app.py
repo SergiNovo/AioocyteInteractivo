@@ -47,12 +47,12 @@ def mostrar_contenido():
     with supervivencia_placeholder:
         st.markdown(f"""
             <div style='text-align: center; margin-top: 10px;'>
-                <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
+                <div style='font-size: 96px; font-weight: bold; color: #005EA8;'>
                     {dato['Survival']:.1f}%
                 </div>
-                <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
+                <div style='font-size: 20px; color: #444;'>Probability of oocyte survival after vitrification</div>
             </div>
-            <hr style="margin: 10px 0;">
+            <hr style="margin: 15px 0;">
         """, unsafe_allow_html=True)
 
     with metrics_placeholder:
@@ -121,12 +121,14 @@ if st.session_state.playing:
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
         render_slider()
-# Logo con enlace
-st.markdown("""
-<div style='text-align: center; margin-top: 30px;'>
-    <a href='https://www.fertilab.com' target='_blank'>
-        <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
-             alt='Fertilab Barcelona' width='200'/>
-    </a>
-</div>
-""", unsafe_allow_html=True)
+
+# Logo dentro de la columna de datos, justo debajo de los botones
+with col_datos:
+    st.markdown("""
+    <div style='text-align: center; margin-top: 20px;'>
+        <a href='https://www.fertilab.com' target='_blank'>
+            <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
+                 alt='Fertilab Barcelona' width='200'/>
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
