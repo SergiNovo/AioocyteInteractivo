@@ -31,10 +31,10 @@ data_placeholder = st.empty()
 slider_placeholder = st.empty()
 control_placeholder = st.empty()
 
-# Layout horizontal
+# Layout principal apaisado
 main_col1, main_col2 = st.columns([2, 3])
 
-# Mostrar imagen + datos (sin columnas internas)
+# Función para mostrar imagen + datos
 def mostrar_contenido():
     with video_placeholder:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
@@ -63,20 +63,20 @@ def mostrar_contenido():
             m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
             m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar por primera vez
+# Mostrar contenido inicial
 mostrar_contenido()
 
-# Slider sincronizado
+# Slider con fondo gráfico
 with slider_placeholder:
     with main_col2:
         st.image("slider_background_final.png", use_container_width=True)
-        slider_value = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed", key="slider_main")
-        if slider_value != st.session_state.second:
-            st.session_state.second = slider_value
+        new_value = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
+        if new_value != st.session_state.second:
+            st.session_state.second = new_value
             st.session_state.playing = False
             mostrar_contenido()
 
-# Botones de control alineados con la parte inferior
+# Controles alineados con parte inferior del vídeo
 with control_placeholder:
     with main_col2:
         c1, c2, c3, c4, c5, c6 = st.columns(6)
@@ -107,7 +107,7 @@ with control_placeholder:
                 st.session_state.playing = True
                 st.session_state.speed = 5
 
-# Reproducción automática con bolita que se mueve
+# Reproducción automática
 if st.session_state.playing:
     for _ in range(100):
         if not st.session_state.playing or st.session_state.second >= 359:
@@ -116,5 +116,3 @@ if st.session_state.playing:
         time.sleep(0.5)
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
-        # Actualiza slider
-        st.session_state.slider_main = st.session_state.second
