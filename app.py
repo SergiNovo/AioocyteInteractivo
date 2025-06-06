@@ -45,16 +45,17 @@ def mostrar_contenido():
 
     dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
-        st.markdown(f"""
-            <div style='text-align: center; margin-top: 10px;'>
-                <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
-                    {dato['Survival']:.1f}%
-                </div>
-                <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
+    dato = df.iloc[st.session_state.second]
+    st.markdown(f"""
+        <div style='text-align: center; margin-top: 10px;'>
+            <div style='font-size: 96px; font-weight: bold; color: #005EA8; line-height: 1;'>
+                {dato['Survival']:.1f}%
             </div>
-            <hr style="margin: 40px 0;">
-        """, unsafe_allow_html=True)
-
+            <div style='font-size: 20px; color: #444; margin-top: 4px;'>Probability of oocyte survival after vitrification</div>
+        </div>
+        <hr style="margin: 20px 0;">
+    """, unsafe_allow_html=True)
+    
     with metrics_placeholder:
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Area %", f"{dato['Area%']:.3f}")
