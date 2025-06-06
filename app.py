@@ -41,7 +41,7 @@ def mostrar_contenido():
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
+            st.image(image, caption=f"sec. {st.session_state.second}", use_container_width=True)
         else:
             st.warning("No se encontró imagen.")
 
