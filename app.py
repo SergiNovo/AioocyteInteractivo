@@ -25,28 +25,28 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Contenedores para evitar duplicación
-video_placeholder = st.empty()
-data_placeholder = st.empty()
-slider_placeholder = st.empty()
-control_placeholder = st.empty()
+# Contenedores que se actualizarán
+video_container = st.empty()
+data_container = st.empty()
+slider_container = st.empty()
+controls_container = st.empty()
 
 # Layout principal apaisado
-main_col1, main_col2 = st.columns([2, 3])
+main_cols = st.columns([2, 3])
 
-# Función para mostrar imagen + datos
+# Función para mostrar el contenido actual
 def mostrar_contenido():
-    with video_placeholder:
+    with video_container:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            main_col1.image(image, caption=f"Second {st.session_state.second}", use_container_width=True)
+            main_cols[0].image(image, caption=f"Second {st.session_state.second}", use_container_width=True)
         else:
-            main_col1.warning("No se encontró imagen.")
+            main_cols[0].warning("No se encontró imagen.")
 
-    with data_placeholder:
+    with data_container:
         dato = df.iloc[st.session_state.second]
-        with main_col2:
+        with main_cols[1]:
             st.markdown(f"""
                 <div style='text-align: center; margin-top: 10px;'>
                     <div style='font-size: 128px; font-weight: bold; color: #005EA8; line-height: 1;'>
@@ -63,12 +63,13 @@ def mostrar_contenido():
             m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
             m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar contenido inicial
+# Mostrar primer frame
+dato = df.iloc[st.session_state.second]
 mostrar_contenido()
 
-# Slider con fondo gráfico
-with slider_placeholder:
-    with main_col2:
+# Slider + imagen de fondo
+with slider_container:
+    with main_cols[1]:
         st.image("slider_background_final.png", use_container_width=True)
         new_value = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
         if new_value != st.session_state.second:
@@ -76,9 +77,9 @@ with slider_placeholder:
             st.session_state.playing = False
             mostrar_contenido()
 
-# Controles alineados con parte inferior del vídeo
-with control_placeholder:
-    with main_col2:
+# Controles
+with controls_container:
+    with main_cols[1]:
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1:
             if st.button("⏪ Back"):
