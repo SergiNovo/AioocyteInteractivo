@@ -4,9 +4,8 @@ from PIL import Image
 import os
 import time
 
+# Configurar página
 st.set_page_config(page_title="Oocyte Tracker", layout="wide")
-
-# Título centrado
 st.markdown("<h1 style='text-align: center;'>Vitrification Viability via Osmotic Response</h1>", unsafe_allow_html=True)
 
 # Cargar datos
@@ -25,7 +24,7 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Layout fijo
+# Estructura visual
 col_video, col_datos = st.columns([2, 3])
 video_placeholder = col_video.empty()
 supervivencia_placeholder = col_datos.empty()
@@ -36,18 +35,16 @@ controles_placeholder = col_datos.empty()
 
 # Mostrar contenido
 def mostrar_contenido():
-    # Imagen
+    frame_path = f"frames/frame_{st.session_state.second}.jpg"
     with video_placeholder:
-        frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
             st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
         else:
             st.warning("No se encontró imagen.")
 
-    # Supervivencia
+    dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
-        dato = df.iloc[st.session_state.second]
         st.markdown(f"""
             <div style='text-align: center; margin-top: 10px;'>
                 <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
@@ -58,7 +55,6 @@ def mostrar_contenido():
             <hr style="margin: 10px 0;">
         """, unsafe_allow_html=True)
 
-    # Métricas
     with metrics_placeholder:
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("Area %", f"{dato['Area%']:.3f}")
@@ -66,21 +62,19 @@ def mostrar_contenido():
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-    # Gráfico del slider
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
 
-# Renderizar slider dinámicamente
+# Renderizar slider sin key duplicado
 def render_slider():
     with slider_placeholder:
-        selected = st.slider("🕒", 0, 359, value=st.session_state.second,
-                             label_visibility="collapsed", key="unique_slider")
+        selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
         if selected != st.session_state.second:
             st.session_state.second = selected
             st.session_state.playing = False
             mostrar_contenido()
 
-# Mostrar inicial
+# Mostrar contenido inicial
 mostrar_contenido()
 render_slider()
 
