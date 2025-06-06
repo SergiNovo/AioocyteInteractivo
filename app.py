@@ -41,7 +41,7 @@ def mostrar_contenido():
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            st.image(image, caption=f"second {st.session_state.second}", use_container_width=True)
+            st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
         else:
             st.warning("No se encontró imagen.")
 
@@ -66,18 +66,20 @@ def mostrar_contenido():
         m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
         m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-    # Gráfico
+    # Gráfico (fondo del slider)
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
 
-    # Slider
-    with slider_placeholder:
-        selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
-        if selected != st.session_state.second:
-            st.session_state.second = selected
-            st.session_state.playing = False
+# Slider fuera de mostrar_contenido() para evitar duplicación
+with slider_placeholder:
+    selected = st.slider("🕒", 0, 359, value=st.session_state.second,
+                         label_visibility="collapsed", key="unique_slider")
+    if selected != st.session_state.second:
+        st.session_state.second = selected
+        st.session_state.playing = False
+        mostrar_contenido()
 
-# Controles de reproducción (una vez, no en bucle)
+# Controles de reproducción
 with controles_placeholder:
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     with c1:
@@ -107,7 +109,7 @@ with controles_placeholder:
             st.session_state.playing = True
             st.session_state.speed = 5
 
-# Mostrar contenido por primera vez
+# Mostrar el primer contenido
 mostrar_contenido()
 
 # Reproducción automática
