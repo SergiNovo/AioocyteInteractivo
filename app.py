@@ -25,67 +25,50 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Contenedores que se actualizarán
-video_container = st.empty()
-data_container = st.empty()
-slider_container = st.empty()
-controls_container = st.empty()
+# Layout apaisado: video izquierda, resto derecha
+col_video, col_datos = st.columns([2, 3])
 
-# Layout principal apaisado
-main_cols = st.columns([2, 3])
-
-# Función para mostrar el contenido actual
+# Mostrar imagen del frame
 def mostrar_contenido():
-    with video_container:
+    with col_video:
         frame_path = f"frames/frame_{st.session_state.second}.jpg"
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            main_cols[0].image(image, caption=f"Second {st.session_state.second}", use_container_width=True)
+            st.image(image, caption=f"Segundo {st.session_state.second}", use_container_width=True)
         else:
-            main_cols[0].warning("No se encontró imagen.")
+            st.warning("No se encontró imagen.")
 
-    with data_container:
+    with col_datos:
         dato = df.iloc[st.session_state.second]
-        with main_cols[1]:
-            st.markdown(f"""
-                <div style='text-align: center; margin-top: 10px;'>
-                    <div style='font-size: 128px; font-weight: bold; color: #005EA8; line-height: 1;'>
-                        {dato['Survival']:.1f}%
-                    </div>
-                    <div style='font-size: 18px; color: #444;'>Probability of oocyte survival after vitrification</div>
+
+        # Probabilidad de supervivencia
+        st.markdown(f"""
+            <div style='text-align: center; margin-top: 10px;'>
+                <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
+                    {dato['Survival']:.1f}%
                 </div>
-                <hr style="margin: 10px 0;">
-            """, unsafe_allow_html=True)
+                <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
+            </div>
+            <hr style="margin: 10px 0;">
+        """, unsafe_allow_html=True)
 
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Area %", f"{dato['Area%']:.3f}")
-            m2.metric("Circularity", f"{dato['Circularity']:.3f}")
-            m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
-            m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
+        # Valores distribuidos
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Area %", f"{dato['Area%']:.3f}")
+        m2.metric("Circularity", f"{dato['Circularity']:.3f}")
+        m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
+        m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
-# Mostrar primer frame
-dato = df.iloc[st.session_state.second]
-mostrar_contenido()
-
-# Slider + imagen de fondo
-with slider_container:
-    with main_cols[1]:
+        # Gráfico + slider
         st.image("slider_background_final.png", use_container_width=True)
-        new_value = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
-        if new_value != st.session_state.second:
-            st.session_state.second = new_value
-            st.session_state.playing = False
-            mostrar_contenido()
+        render_slider()
 
-# Controles
-with controls_container:
-    with main_cols[1]:
+        # Controles justo debajo del slider
         c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1:
             if st.button("⏪ Back"):
                 st.session_state.second = max(0, st.session_state.second - 1)
                 st.session_state.playing = False
-                mostrar_contenido()
         with c2:
             if st.button("▶️ Play 1x"):
                 st.session_state.playing = True
@@ -94,7 +77,6 @@ with controls_container:
             if st.button("⏩ Forward"):
                 st.session_state.second = min(359, st.session_state.second + 1)
                 st.session_state.playing = False
-                mostrar_contenido()
         with c4:
             if st.button("⏸️ Pause"):
                 st.session_state.playing = False
@@ -102,11 +84,23 @@ with controls_container:
             if st.button("⏹️ Stop"):
                 st.session_state.playing = False
                 st.session_state.second = 0
-                mostrar_contenido()
         with c6:
             if st.button("⏩ Play 5x"):
                 st.session_state.playing = True
                 st.session_state.speed = 5
+
+# Función slider
+def render_slider():
+    st.slider("🕒", 0, 359, value=st.session_state.second,
+              key="slider_key", label_visibility="collapsed",
+              on_change=slider_changed)
+
+# Callback para el slider
+def slider_changed():
+    st.session_state.playing = False
+
+# Mostrar por primera vez
+mostrar_contenido()
 
 # Reproducción automática
 if st.session_state.playing:
