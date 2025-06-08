@@ -4,7 +4,7 @@ from PIL import Image
 import os
 import time
 
-# Configuración
+# Configurar página
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.markdown("<h2 style='text-align: center;'>Vitrification Viability via Osmotic Response</h2>", unsafe_allow_html=True)
 
@@ -29,75 +29,64 @@ frame_path = f"frames/frame_{st.session_state.second}.jpg"
 if os.path.exists(frame_path):
     image = Image.open(frame_path)
     st.image(image, use_container_width=True)
-else:
-    st.warning("No se encontró imagen.")
 
-# Mostrar probabilidad
+# Supervivencia centrada y grande
 dato = df.iloc[st.session_state.second]
 st.markdown(f"""
-    <div style='text-align: center; margin-top: 5px;'>
-        <div style='font-size: 72px; font-weight: bold; color: #005EA8;'>
+    <div style='text-align: center;'>
+        <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
             {dato['Survival']:.1f}%
         </div>
-        <div style='font-size: 18px; color: #444;'>Probability of oocyte survival after vitrification</div>
+        <div style='font-size: 16px;'>Probability of oocyte survival after vitrification</div>
     </div>
-    <hr style="margin: 5px 0;">
 """, unsafe_allow_html=True)
 
-# Estadísticas centradas
-col1, col2, col3, col4 = st.columns(4)
-with col1: st.metric("Area %", f"{dato['Area%']:.3f}")
-with col2: st.metric("Circularity", f"{dato['Circularity']:.3f}")
-with col3: st.metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
-with col4: st.metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
+# Métricas centradas
+cols = st.columns(4)
+cols[0].metric("Area %", f"{dato['Area%']:.3f}")
+cols[1].metric("Circularity", f"{dato['Circularity']:.3f}")
+cols[2].metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
+cols[3].metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
 
-# Slider
-slider_key = "unique_slider_key"
-selected = st.slider("🕒", 0, 359, value=st.session_state.second, key=slider_key, label_visibility="collapsed")
+# Slider sin clave
+selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
 if selected != st.session_state.second:
     st.session_state.second = selected
     st.session_state.playing = False
 
-# Imagen de fondo de la gráfica
+# Imagen gráfica
 st.image("slider_background_final.png", use_container_width=True)
 
-# Controles
-colA, colB, colC, colD, colE, colF = st.columns(6)
-with colA:
-    if st.button("⏪ Back"):
-        st.session_state.second = max(0, st.session_state.second - 1)
-        st.session_state.playing = False
-with colB:
-    if st.button("▶️ Play 1x"):
-        st.session_state.playing = True
-        st.session_state.speed = 1
-with colC:
-    if st.button("⏩ Forward"):
-        st.session_state.second = min(359, st.session_state.second + 1)
-        st.session_state.playing = False
-with colD:
-    if st.button("⏸️ Pause"):
-        st.session_state.playing = False
-with colE:
-    if st.button("⏹️ Stop"):
-        st.session_state.playing = False
-        st.session_state.second = 0
-with colF:
-    if st.button("▶️ Play 5x"):
-        st.session_state.playing = True
-        st.session_state.speed = 5
+# Botones
+buttons = st.columns(6)
+if buttons[0].button("⏪ Back"):
+    st.session_state.second = max(0, st.session_state.second - 1)
+    st.session_state.playing = False
+if buttons[1].button("▶️ Play 1x"):
+    st.session_state.playing = True
+    st.session_state.speed = 1
+if buttons[2].button("⏩ Forward"):
+    st.session_state.second = min(359, st.session_state.second + 1)
+    st.session_state.playing = False
+if buttons[3].button("⏸️ Pause"):
+    st.session_state.playing = False
+if buttons[4].button("⏹️ Stop"):
+    st.session_state.second = 0
+    st.session_state.playing = False
+if buttons[5].button("▶️ Play 5x"):
+    st.session_state.playing = True
+    st.session_state.speed = 5
 
-# Reproducción automática
+# Reproducción automática controlada
 if st.session_state.playing:
-    for _ in range(500):
-        if not st.session_state.playing or st.session_state.second >= 359:
-            st.session_state.playing = False
-            break
-        time.sleep(0.5)
-        st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
+    time.sleep(0.3)
+    if st.session_state.second < 359:
+        st.session_state.second += st.session_state.speed
         st.experimental_rerun()
+    else:
+        st.session_state.playing = False
 
-# Logo final
+# Logo centrado
 st.markdown("""
     <div style='text-align: center; margin-top: 20px;'>
         <a href='https://www.fertilab.com' target='_blank'>
