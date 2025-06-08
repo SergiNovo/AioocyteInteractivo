@@ -4,7 +4,7 @@ from PIL import Image
 import os
 import time
 
-# Configurar página
+# Configuración de la página
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.markdown("<h2 style='text-align: center;'>Vitrification Viability via Osmotic Response</h2>", unsafe_allow_html=True)
 
@@ -12,8 +12,7 @@ st.markdown("<h2 style='text-align: center;'>Vitrification Viability via Osmotic
 df = pd.read_csv("AioocyteV1.csv", sep=";")
 for col in df.columns:
     if df[col].dtype == 'object':
-        df[col] = df[col].str.replace('%', '', regex=False)
-        df[col] = df[col].str.replace(',', '.', regex=False)
+        df[col] = df[col].str.replace('%', '', regex=False).str.replace(',', '.', regex=False)
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
 # Estado inicial
@@ -24,69 +23,76 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Mostrar imagen
-frame_path = f"frames/frame_{st.session_state.second}.jpg"
-if os.path.exists(frame_path):
-    image = Image.open(frame_path)
-    st.image(image, use_container_width=True)
+# Mostrar contenido dinámico
+def mostrar_contenido():
+    frame_path = f"frames/frame_{st.session_state.second}.jpg"
+    if os.path.exists(frame_path):
+        st.image(Image.open(frame_path), use_container_width=True)
 
-# Supervivencia centrada y grande
-dato = df.iloc[st.session_state.second]
-st.markdown(f"""
-    <div style='text-align: center;'>
-        <div style='font-size: 64px; font-weight: bold; color: #005EA8;'>
-            {dato['Survival']:.1f}%
+    dato = df.iloc[st.session_state.second]
+    st.markdown(f"""
+        <div style='text-align: center; margin-top: 5px;'>
+            <div style='font-size: 72px; font-weight: bold; color: #005EA8;'>
+                {dato['Survival']:.1f}%
+            </div>
+            <div style='font-size: 18px; color: #444;'>Probability of oocyte survival after vitrification</div>
         </div>
-        <div style='font-size: 16px;'>Probability of oocyte survival after vitrification</div>
-    </div>
-""", unsafe_allow_html=True)
+        <hr style="margin: 5px 0;">
+    """, unsafe_allow_html=True)
 
-# Métricas centradas
-cols = st.columns(4)
-cols[0].metric("Area %", f"{dato['Area%']:.3f}")
-cols[1].metric("Circularity", f"{dato['Circularity']:.3f}")
-cols[2].metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
-cols[3].metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Area %", f"{dato['Area%']:.3f}")
+    c2.metric("Circularity", f"{dato['Circularity']:.3f}")
+    c3.metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
+    c4.metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
 
-# Slider sin clave
-selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
-if selected != st.session_state.second:
-    st.session_state.second = selected
+# Mostrar contenido actual
+mostrar_contenido()
+
+# Slider con key único
+slider_val = st.slider("🕒", 0, 359, value=st.session_state.second, key="slider_unique", label_visibility="collapsed")
+if slider_val != st.session_state.second:
+    st.session_state.second = slider_val
     st.session_state.playing = False
+    mostrar_contenido()
 
-# Imagen gráfica
+# Imagen de fondo
 st.image("slider_background_final.png", use_container_width=True)
 
 # Botones
-buttons = st.columns(6)
-if buttons[0].button("⏪ Back"):
-    st.session_state.second = max(0, st.session_state.second - 1)
-    st.session_state.playing = False
-if buttons[1].button("▶️ Play 1x"):
-    st.session_state.playing = True
-    st.session_state.speed = 1
-if buttons[2].button("⏩ Forward"):
-    st.session_state.second = min(359, st.session_state.second + 1)
-    st.session_state.playing = False
-if buttons[3].button("⏸️ Pause"):
-    st.session_state.playing = False
-if buttons[4].button("⏹️ Stop"):
-    st.session_state.second = 0
-    st.session_state.playing = False
-if buttons[5].button("▶️ Play 5x"):
-    st.session_state.playing = True
-    st.session_state.speed = 5
-
-# Reproducción automática controlada
-if st.session_state.playing:
-    time.sleep(0.3)
-    if st.session_state.second < 359:
-        st.session_state.second += st.session_state.speed
-        st.experimental_rerun()
-    else:
+c1, c2, c3, c4, c5, c6 = st.columns(6)
+with c1:
+    if st.button("⏪ Back"):
+        st.session_state.second = max(0, st.session_state.second - 1)
         st.session_state.playing = False
+with c2:
+    if st.button("▶️ Play 1x"):
+        st.session_state.playing = True
+        st.session_state.speed = 1
+with c3:
+    if st.button("⏩ Forward"):
+        st.session_state.second = min(359, st.session_state.second + 1)
+        st.session_state.playing = False
+with c4:
+    if st.button("⏸️ Pause"):
+        st.session_state.playing = False
+with c5:
+    if st.button("⏹️ Stop"):
+        st.session_state.second = 0
+        st.session_state.playing = False
+with c6:
+    if st.button("▶️ Play 5x"):
+        st.session_state.playing = True
+        st.session_state.speed = 5
 
-# Logo centrado
+# Reproducción automática (fuera del bucle Streamlit)
+if st.session_state.playing:
+    time.sleep(0.2)
+    st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
+    st.session_state.playing = True
+    st.experimental_rerun()
+
+# Logo
 st.markdown("""
     <div style='text-align: center; margin-top: 20px;'>
         <a href='https://www.fertilab.com' target='_blank'>
