@@ -4,7 +4,7 @@ from PIL import Image
 import os
 import time
 
-# Configuración de la página
+# Configurar la página para móviles
 st.set_page_config(page_title="Oocyte Tracker", layout="centered")
 st.markdown("<h2 style='text-align: center;'>Vitrification Viability via Osmotic Response</h2>", unsafe_allow_html=True)
 
@@ -23,11 +23,14 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Mostrar contenido dinámico
+# Mostrar imagen
 def mostrar_contenido():
     frame_path = f"frames/frame_{st.session_state.second}.jpg"
     if os.path.exists(frame_path):
-        st.image(Image.open(frame_path), use_container_width=True)
+        image = Image.open(frame_path)
+        st.image(image, use_container_width=True)
+    else:
+        st.warning("No se encontró imagen.")
 
     dato = df.iloc[st.session_state.second]
     st.markdown(f"""
@@ -41,63 +44,66 @@ def mostrar_contenido():
     """, unsafe_allow_html=True)
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Area %", f"{dato['Area%']:.3f}")
-    c2.metric("Circularity", f"{dato['Circularity']:.3f}")
-    c3.metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
-    c4.metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
+    with c1: st.metric("Area %", f"{dato['Area%']:.3f}")
+    with c2: st.metric("Circularity", f"{dato['Circularity']:.3f}")
+    with c3: st.metric("Dehydration %/s", f"{dato['Vdeshidratacion']:.2f}")
+    with c4: st.metric("Deplasmolysis %/s", f"{dato['Vdeplasmolisi']:.2f}")
 
-# Mostrar contenido actual
+# Mostrar todo
 mostrar_contenido()
 
-# Slider con key único
-slider_val = st.slider("🕒", 0, 359, value=st.session_state.second, key="slider_unique", label_visibility="collapsed")
-if slider_val != st.session_state.second:
-    st.session_state.second = slider_val
+# Slider
+selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed", key="slider_unique")
+if selected != st.session_state.second:
+    st.session_state.second = selected
     st.session_state.playing = False
     mostrar_contenido()
 
-# Imagen de fondo
+# Gráfico
 st.image("slider_background_final.png", use_container_width=True)
 
-# Botones
-c1, c2, c3, c4, c5, c6 = st.columns(6)
-with c1:
-    if st.button("⏪ Back"):
+# Botones en una sola fila
+b1, b2, b3, b4, b5, b6 = st.columns(6)
+with b1:
+    if st.button("⏪"):
         st.session_state.second = max(0, st.session_state.second - 1)
         st.session_state.playing = False
-with c2:
-    if st.button("▶️ Play 1x"):
+with b2:
+    if st.button("▶️ 1x"):
         st.session_state.playing = True
         st.session_state.speed = 1
-with c3:
-    if st.button("⏩ Forward"):
+with b3:
+    if st.button("⏩"):
         st.session_state.second = min(359, st.session_state.second + 1)
         st.session_state.playing = False
-with c4:
-    if st.button("⏸️ Pause"):
+with b4:
+    if st.button("⏸️"):
         st.session_state.playing = False
-with c5:
-    if st.button("⏹️ Stop"):
+with b5:
+    if st.button("⏹️"):
+        st.session_state.playing = False
         st.session_state.second = 0
-        st.session_state.playing = False
-with c6:
-    if st.button("▶️ Play 5x"):
+with b6:
+    if st.button("▶️ 5x"):
         st.session_state.playing = True
         st.session_state.speed = 5
 
-# Reproducción automática (fuera del bucle Streamlit)
+# Reproducción automática sin usar experimental_rerun
 if st.session_state.playing:
-    time.sleep(0.2)
-    st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
-    st.session_state.playing = True
-    st.experimental_rerun()
+    for _ in range(500):
+        if not st.session_state.playing or st.session_state.second >= 359:
+            st.session_state.playing = False
+            break
+        time.sleep(0.3)
+        st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
+        mostrar_contenido()
+        st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed", key="slider_unique", disabled=True)
 
 # Logo
 st.markdown("""
     <div style='text-align: center; margin-top: 20px;'>
         <a href='https://www.fertilab.com' target='_blank'>
-            <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
-                 alt='Fertilab Barcelona' width='250'/>
+            <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' width='250'/>
         </a>
     </div>
 """, unsafe_allow_html=True)
