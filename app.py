@@ -1,4 +1,4 @@
-ximport streamlit as st
+import streamlit as st
 import pandas as pd
 from PIL import Image
 import os
@@ -169,4 +169,3 @@ if st.session_state.playing:
         mostrar_contenido()
         render_slider()
         mostrar_logo()
-
