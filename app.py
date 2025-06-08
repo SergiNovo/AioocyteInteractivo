@@ -5,8 +5,8 @@ import os
 import time
 
 # Configurar página
-st.set_page_config(page_title="Vitrification Viability via Osmotic Response", layout="centered")
-st.markdown("<h3 style='text-align: center;'>Vitrification Viability via Osmotic Response</h3>", unsafe_allow_html=True)
+st.set_page_config(page_title="Vitrification Viability via Osmotic Response", layout="wide")
+st.markdown("<h1 style='text-align: center;'>Vitrification Viability via Osmotic Response</h1>", unsafe_allow_html=True)
 
 # Cargar datos
 df = pd.read_csv("AioocyteV1.csv", sep=";")
@@ -24,9 +24,8 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Estructura visual: solo una columna para móvil
-col_video = st.container()
-col_datos = st.container()
+# Estructura visual
+col_video, col_datos = st.columns([2, 3])
 video_placeholder = col_video.empty()
 supervivencia_placeholder = col_datos.empty()
 metrics_placeholder = col_datos.empty()
@@ -40,7 +39,7 @@ def mostrar_contenido():
     with video_placeholder:
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            st.image(image, caption=f"Second {st.session_state.second}", width=280)
+            st.image(image, caption=f"second {st.session_state.second}", use_container_width=True)
         else:
             st.warning("No se encontró imagen.")
 
@@ -48,10 +47,10 @@ def mostrar_contenido():
     with supervivencia_placeholder:
         st.markdown(f"""
             <div style='text-align: center; margin-top: 1px;'>
-                <div style='font-size: 30px; font-weight: bold; color: #005EA8;'>
+                <div style='font-size: 50px; font-weight: bold; color: #005EA8;'>
                     {dato['Survival']:.1f}%
                 </div>
-                <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
+                <div style='font-size: 20px; color: #444;'>Probability of oocyte survival after vitrification</div>
             </div>
             <hr style="margin: 1px 0;">
         """, unsafe_allow_html=True)
@@ -66,7 +65,7 @@ def mostrar_contenido():
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
 
-# Renderizar slider
+# Renderizar slider sin key duplicado
 def render_slider():
     with slider_placeholder:
         selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
@@ -123,13 +122,14 @@ if st.session_state.playing:
         mostrar_contenido()
         render_slider()
 
-# Logo final
+# Logo dentro de la columna de datos, justo debajo de los botones
 with col_datos:
     st.markdown("""
     <div style='text-align: center; margin-top: 10px;'>
         <a href='https://www.fertilab.com' target='_blank'>
             <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
-                 alt='Fertilab Barcelona' width='120'/>
+                 alt='Fertilab Barcelona' width='200'/>
         </a>
     </div>
     """, unsafe_allow_html=True)
+
