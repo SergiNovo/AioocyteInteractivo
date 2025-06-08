@@ -22,17 +22,17 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# --- Bloques secuenciales, para móvil ---
+# Bloques secuenciales (uno debajo de otro)
 video_placeholder = st.empty()
-slider_placeholder = st.empty()
 supervivencia_placeholder = st.empty()
 metrics_placeholder = st.empty()
 grafico_placeholder = st.empty()
+slider_placeholder = st.empty()
 controles_placeholder = st.empty()
 logo_placeholder = st.empty()
 
 def mostrar_contenido():
-    # 1. Frame de video
+    # 1. Video/frame arriba del todo
     frame_path = f"frames/frame_{st.session_state.second}.jpg"
     with video_placeholder:
         if os.path.exists(frame_path):
@@ -41,7 +41,7 @@ def mostrar_contenido():
         else:
             st.warning("No se encontró imagen.")
 
-    # 2. Datos y métricas
+    # 2. Supervivencia
     dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
         st.markdown(f"""
@@ -53,6 +53,7 @@ def mostrar_contenido():
             </div>
             <hr style="margin: 1px 0;">
         """, unsafe_allow_html=True)
+    # 3. Métricas
     with metrics_placeholder:
         st.markdown(
             f"""
@@ -64,10 +65,12 @@ def mostrar_contenido():
             </div>
             """, unsafe_allow_html=True
         )
+    # 4. Gráfico
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
 
 def render_slider():
+    # 5. Slider
     with slider_placeholder:
         selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
         if selected != st.session_state.second:
@@ -75,12 +78,13 @@ def render_slider():
             st.session_state.playing = False
             mostrar_contenido()
 
-# --- ORDEN ---
+# Mostramos todo en el orden definido
 mostrar_contenido()
 render_slider()
 
+# 6. Controles (todos visibles)
 with controles_placeholder:
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
     with col1:
         if st.button("⏪ Back"):
             st.session_state.second = max(0, st.session_state.second - 1)
@@ -97,7 +101,6 @@ with controles_placeholder:
             st.session_state.playing = False
             mostrar_contenido()
             render_slider()
-    col4, col5, col6 = st.columns(3)
     with col4:
         if st.button("⏸️ Pause"):
             st.session_state.playing = False
@@ -112,6 +115,7 @@ with controles_placeholder:
             st.session_state.playing = True
             st.session_state.speed = 5
 
+# Auto-reproducción
 if st.session_state.playing:
     for _ in range(500):
         if not st.session_state.playing or st.session_state.second >= 359:
@@ -122,6 +126,7 @@ if st.session_state.playing:
         mostrar_contenido()
         render_slider()
 
+# 7. Logo (al final)
 with logo_placeholder:
     st.markdown("""
     <div style='text-align: center; margin-top: 10px;'>
