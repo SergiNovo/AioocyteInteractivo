@@ -1,4 +1,4 @@
-import streamlit as st
+ximport streamlit as st
 import pandas as pd
 from PIL import Image
 import os
@@ -41,30 +41,57 @@ def mostrar_contenido():
         else:
             st.warning("No se encontró imagen.")
 
-    # 2. Supervivencia
+    # 2. Supervivencia (MUY GRANDE)
     dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
         st.markdown(f"""
-            <div style='text-align: center; margin-top: 1px;'>
-                <div style='font-size: 40px; font-weight: bold; color: #005EA8;'>
+            <div style='text-align: center; margin-top: 6px; margin-bottom: 0px;'>
+                <div style='font-size: 64px; font-weight: bold; color: #005EA8; line-height: 0.9;'>
                     {dato['Survival']:.1f}%
                 </div>
-                <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
+                <div style='font-size: 18px; color: #444;'>Probability of oocyte survival after vitrification</div>
             </div>
             <hr style="margin: 1px 0;">
         """, unsafe_allow_html=True)
-    # 3. Métricas
+    # 3. Métricas: en una sola línea, cada una con título encima, número debajo, todo ancho
     with metrics_placeholder:
-        st.markdown(
-            f"""
-            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center;'>
-                <div style='margin-bottom: 4px;'><b>Area %</b>: {dato['Area%']:.3f}</div>
-                <div style='margin-bottom: 4px;'><b>Circularity</b>: {dato['Circularity']:.3f}</div>
-                <div style='margin-bottom: 4px;'><b>Dehydration rate %/s</b>: {dato['Vdeshidratacion']:.2f}%</div>
-                <div><b>Deplasmolysis rate %/s</b>: {dato['Vdeplasmolisi']:.2f}%</div>
-            </div>
-            """, unsafe_allow_html=True
-        )
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown(
+                f"""
+                <div style='text-align:center;'>
+                    <div style='font-size:16px; color:#888;'>Area %</div>
+                    <div style='font-size:26px; font-weight:bold; color:#222'>{dato['Area%']:.3f}</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+        with col2:
+            st.markdown(
+                f"""
+                <div style='text-align:center;'>
+                    <div style='font-size:16px; color:#888;'>Circularity</div>
+                    <div style='font-size:26px; font-weight:bold; color:#222'>{dato['Circularity']:.3f}</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+        with col3:
+            st.markdown(
+                f"""
+                <div style='text-align:center;'>
+                    <div style='font-size:16px; color:#888;'>Dehyd. rate<br>%/s</div>
+                    <div style='font-size:26px; font-weight:bold; color:#222'>{dato['Vdeshidratacion']:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+        with col4:
+            st.markdown(
+                f"""
+                <div style='text-align:center;'>
+                    <div style='font-size:16px; color:#888;'>Deplasmo. rate<br>%/s</div>
+                    <div style='font-size:26px; font-weight:bold; color:#222'>{dato['Vdeplasmolisi']:.2f}%</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
     # 4. Gráfico
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
@@ -77,10 +104,23 @@ def render_slider():
             st.session_state.second = selected
             st.session_state.playing = False
             mostrar_contenido()
+            mostrar_logo()  # <- Para que el logo no desaparezca
+
+def mostrar_logo():
+    with logo_placeholder:
+        st.markdown("""
+        <div style='text-align: center; margin-top: 10px;'>
+            <a href='https://www.fertilab.com' target='_blank'>
+                <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
+                     alt='Fertilab Barcelona' width='160'/>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Mostramos todo en el orden definido
 mostrar_contenido()
 render_slider()
+mostrar_logo()
 
 # 6. Controles (todos visibles)
 with controles_placeholder:
@@ -91,6 +131,7 @@ with controles_placeholder:
             st.session_state.playing = False
             mostrar_contenido()
             render_slider()
+            mostrar_logo()
     with col2:
         if st.button("▶️ Play 1x"):
             st.session_state.playing = True
@@ -101,6 +142,7 @@ with controles_placeholder:
             st.session_state.playing = False
             mostrar_contenido()
             render_slider()
+            mostrar_logo()
     with col4:
         if st.button("⏸️ Pause"):
             st.session_state.playing = False
@@ -110,12 +152,13 @@ with controles_placeholder:
             st.session_state.second = 0
             mostrar_contenido()
             render_slider()
+            mostrar_logo()
     with col6:
         if st.button("⏩ Play 5x"):
             st.session_state.playing = True
             st.session_state.speed = 5
 
-# Auto-reproducción
+# Auto-reproducción (el logo siempre se mantiene)
 if st.session_state.playing:
     for _ in range(500):
         if not st.session_state.playing or st.session_state.second >= 359:
@@ -125,14 +168,5 @@ if st.session_state.playing:
         st.session_state.second = min(359, st.session_state.second + st.session_state.speed)
         mostrar_contenido()
         render_slider()
+        mostrar_logo()
 
-# 7. Logo (al final)
-with logo_placeholder:
-    st.markdown("""
-    <div style='text-align: center; margin-top: 10px;'>
-        <a href='https://www.fertilab.com' target='_blank'>
-            <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
-                 alt='Fertilab Barcelona' width='160'/>
-        </a>
-    </div>
-    """, unsafe_allow_html=True)
