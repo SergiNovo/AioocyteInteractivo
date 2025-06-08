@@ -24,13 +24,15 @@ if "playing" not in st.session_state:
 if "speed" not in st.session_state:
     st.session_state.speed = 1
 
-# Contenedores en una sola columna
-video_placeholder = st.container()
-supervivencia_placeholder = st.container()
-metrics_placeholder = st.container()
-grafico_placeholder = st.container()
-slider_placeholder = st.container()
-controles_placeholder = st.container()
+# Estructura visual: solo una columna para móvil
+col_video = st.container()
+col_datos = st.container()
+video_placeholder = col_video.empty()
+supervivencia_placeholder = col_datos.empty()
+metrics_placeholder = col_datos.empty()
+grafico_placeholder = col_datos.empty()
+slider_placeholder = col_datos.empty()
+controles_placeholder = col_datos.empty()
 
 # Mostrar contenido
 def mostrar_contenido():
@@ -38,36 +40,33 @@ def mostrar_contenido():
     with video_placeholder:
         if os.path.exists(frame_path):
             image = Image.open(frame_path)
-            st.image(image, caption=f"Second {st.session_state.second}", width=300)
+            st.image(image, caption=f"Second {st.session_state.second}", width=280)
         else:
             st.warning("No se encontró imagen.")
 
     dato = df.iloc[st.session_state.second]
     with supervivencia_placeholder:
         st.markdown(f"""
-            <div style='text-align: center; margin-top: 5px;'>
+            <div style='text-align: center; margin-top: 1px;'>
                 <div style='font-size: 30px; font-weight: bold; color: #005EA8;'>
                     {dato['Survival']:.1f}%
                 </div>
                 <div style='font-size: 16px; color: #444;'>Probability of oocyte survival after vitrification</div>
             </div>
-            <hr style="margin: 4px 0;">
+            <hr style="margin: 1px 0;">
         """, unsafe_allow_html=True)
 
     with metrics_placeholder:
-        st.markdown(f"""
-            <div style='display: flex; justify-content: space-around; font-size: 14px;'>
-                <div><b>Area %</b><br>{dato['Area%']:.3f}</div>
-                <div><b>Circularity</b><br>{dato['Circularity']:.3f}</div>
-                <div><b>Dehyd. rate</b><br>{dato['Vdeshidratacion']:.2f}%</div>
-                <div><b>Depl. rate</b><br>{dato['Vdeplasmolisi']:.2f}%</div>
-            </div>
-        """, unsafe_allow_html=True)
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Area %", f"{dato['Area%']:.3f}")
+        m2.metric("Circularity", f"{dato['Circularity']:.3f}")
+        m3.metric("Dehydration rate %/s", f"{dato['Vdeshidratacion']:.2f}%")
+        m4.metric("Deplasmolysis rate %/s", f"{dato['Vdeplasmolisi']:.2f}%")
 
     with grafico_placeholder:
         st.image("slider_background_final.png", use_container_width=True)
 
-# Slider
+# Renderizar slider
 def render_slider():
     with slider_placeholder:
         selected = st.slider("🕒", 0, 359, value=st.session_state.second, label_visibility="collapsed")
@@ -76,41 +75,39 @@ def render_slider():
             st.session_state.playing = False
             mostrar_contenido()
 
-# Contenido inicial
+# Mostrar contenido inicial
 mostrar_contenido()
 render_slider()
 
 # Controles
 with controles_placeholder:
-    st.markdown("<hr style='margin: 5px 0;'>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
-    with col1:
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    with c1:
         if st.button("⏪ Back"):
             st.session_state.second = max(0, st.session_state.second - 1)
             st.session_state.playing = False
             mostrar_contenido()
             render_slider()
-    with col2:
-        if st.button("▶️ Play"):
+    with c2:
+        if st.button("▶️ Play 1x"):
             st.session_state.playing = True
             st.session_state.speed = 1
-    with col3:
+    with c3:
         if st.button("⏩ Forward"):
             st.session_state.second = min(359, st.session_state.second + 1)
             st.session_state.playing = False
             mostrar_contenido()
             render_slider()
-    col4, col5, col6 = st.columns(3)
-    with col4:
+    with c4:
         if st.button("⏸️ Pause"):
             st.session_state.playing = False
-    with col5:
+    with c5:
         if st.button("⏹️ Stop"):
             st.session_state.playing = False
             st.session_state.second = 0
             mostrar_contenido()
             render_slider()
-    with col6:
+    with c6:
         if st.button("⏩ Play 5x"):
             st.session_state.playing = True
             st.session_state.speed = 5
@@ -126,12 +123,13 @@ if st.session_state.playing:
         mostrar_contenido()
         render_slider()
 
-# Logo al final
-st.markdown("""
-<div style='text-align: center; margin-top: 10px;'>
-    <a href='https://www.fertilab.com' target='_blank'>
-        <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
-             alt='Fertilab Barcelona' width='120'/>
-    </a>
-</div>
-""", unsafe_allow_html=True)
+# Logo final
+with col_datos:
+    st.markdown("""
+    <div style='text-align: center; margin-top: 10px;'>
+        <a href='https://www.fertilab.com' target='_blank'>
+            <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
+                 alt='Fertilab Barcelona' width='120'/>
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
