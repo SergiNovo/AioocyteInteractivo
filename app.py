@@ -42,7 +42,7 @@ def mostrar_contenido():
     with supervivencia_placeholder:
         st.markdown(f"""
             <div style='text-align: center; margin-top: 6px; margin-bottom: 0px;'>
-                <div style='font-size: 64px; font-weight: bold; color: #005EA8; line-height: 0.9;'>
+                <div style='font-size: 96px; font-weight: bold; color: #005EA8; line-height: 0.9;'>
                     {dato['Survival']:.1f}%
                 </div>
                 <div style='font-size: 18px; color: #444;'>Probability of oocyte survival after vitrification</div>
@@ -105,7 +105,7 @@ def render_slider():
 def mostrar_logo():
     with logo_placeholder:
         st.markdown("""
-        <div style='text-align: center; margin-top: 10px;'>
+        <div style='text-align: center; margin-top: 20px;'>
             <a href='https://www.fertilab.com' target='_blank'>
                 <img src='https://redinfertiles.com/wp-content/uploads/2022/04/logo-Barcelona.png' 
                      alt='Fertilab Barcelona' width='160'/>
